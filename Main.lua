@@ -5,56 +5,38 @@ local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local CG = game:GetService("CoreGui") or LP:WaitForChild("PlayerGui")
 
--- [1. ANTI-AFK CHẠY NGẦM]
+-- [1. ANTI-AFK]
 task.spawn(function()
-    local VirtualUser = game:GetService("VirtualUser")
-    LP.Idled:Connect(function()
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new())
-    end)
+    local VU = game:GetService("VirtualUser")
+    LP.Idled:Connect(function() VU:CaptureController() VU:ClickButton2(Vector2.new()) end)
 end)
 
 local Screen = Instance.new("ScreenGui", CG)
-Screen.Name = "TDZ_V2_FARM_VIP"
+Screen.Name = "TDZ_V2_FIXED"
 
 local Main = Instance.new("Frame", Screen)
-Main.Size = UDim2.new(0, 350, 0, 300) -- Tăng size để chứa thêm nút
+Main.Size = UDim2.new(0, 350, 0, 300)
 Main.Position = UDim2.new(0.5, -175, 0.3, 0)
-Main.BackgroundColor3 = Color3.fromRGB(12, 12, 15)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 Main.Active = true; Main.Draggable = true
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
-
-local Stroke = Instance.new("UIStroke", Main)
-Stroke.Thickness, Stroke.ApplyStrokeMode = 3, 2
-task.spawn(function()
-    local h = 0 while task.wait() do h = h + 1/360 Stroke.Color = Color3.fromHSV(h % 1, 0.8, 1) end
-end)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
 local Title = Instance.new("TextLabel", Main)
-Title.Size, Title.Text, Title.TextColor3, Title.Font, Title.TextSize, Title.BackgroundTransparency = UDim2.new(1,0,0,50), "TDZ ULTIMATE V2 - AUTO FARM", Color3.new(1,1,1), 10, 16, 1
+Title.Size, Title.Text, Title.TextColor3, Title.Font, Title.TextSize, Title.BackgroundTransparency = UDim2.new(1,0,0,50), "TDZ AUTO FARM VIP", Color3.new(1,1,1), 10, 18, 1
 
 local Content = Instance.new("Frame", Main)
 Content.Size, Content.Position, Content.BackgroundTransparency = UDim2.new(1,0,1,-50), UDim2.new(0,0,0,50), 1
 
 local function CreateBtn(name, pos, color)
     local btn = Instance.new("TextButton", Content)
-    btn.Size, btn.Position, btn.BackgroundColor3, btn.Text, btn.TextColor3, btn.Font, btn.TextSize = UDim2.new(0, 160, 0, 35), pos, color or Color3.fromRGB(30, 30, 35), name, Color3.new(1,1,1), 10, 10
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6); return btn
+    btn.Size, btn.Position, btn.BackgroundColor3, btn.Text, btn.TextColor3, btn.Font, btn.TextSize = UDim2.new(0, 330, 0, 45), pos, color or Color3.fromRGB(35, 35, 40), name, Color3.new(1,1,1), 10, 12
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    return btn
 end
 
--- [2. CÁC NÚT CHỨC NĂNG]
+-- [NÚT AUTO FARM CHÍNH]
 local FarmBtn = CreateBtn("AUTO FARM VIP: OFF", UDim2.new(0, 10, 0, 10), Color3.fromRGB(200, 50, 50))
-FarmBtn.Size = UDim2.new(0, 330, 0, 40)
 
-local SpeedBtn = CreateBtn("SPEED HACK: OFF", UDim2.new(0, 10, 0, 60))
-local EspBtn = CreateBtn("ESP PLAYER: OFF", UDim2.new(0, 180, 0, 60))
-local JumpBtn = CreateBtn("INF JUMP: OFF", UDim2.new(0, 10, 0, 105))
-local NoclipBtn = CreateBtn("NOCLIP: OFF", UDim2.new(0, 180, 0, 105))
-
-local SellBtn = CreateBtn("AUTO REMOTE SELL: OFF", UDim2.new(0, 10, 0, 150), Color3.fromRGB(0, 110, 190))
-SellBtn.Size = UDim2.new(0, 330, 0, 40)
-
--- [3. LOGIC AUTO FARM VIP]
 local autoFarm = false
 FarmBtn.MouseButton1Click:Connect(function()
     autoFarm = not autoFarm
@@ -90,65 +72,10 @@ FarmBtn.MouseButton1Click:Connect(function()
             end
             task.wait(0.5)
         end
-        Title.Text = "TDZ ULTIMATE V2"
+        Title.Text = "TDZ AUTO FARM VIP"
     end)
 end)
 
--- [4. LOGIC AUTO SELL]
-local autoSell = false
-SellBtn.MouseButton1Click:Connect(function()
-    autoSell = not autoSell
-    SellBtn.Text = autoSell and "AUTO SELL: ON" or "AUTO SELL: OFF"
-    SellBtn.BackgroundColor3 = autoSell and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(0, 110, 190)
-    task.spawn(function()
-        while autoSell do
-            local remote = RS:FindFirstChild("SellFish", true) or RS:FindFirstChild("Sell", true)
-            if remote then remote:FireServer() end
-            task.wait(10) -- Tự động bán mỗi 10 giây
-        end
-    end)
-end)
-
--- [5. GIỮ CÁC LOGIC CŨ]
-local speedOn = false
-SpeedBtn.MouseButton1Click:Connect(function()
-    speedOn = not speedOn
-    SpeedBtn.Text = speedOn and "SPEED: ON" or "SPEED: OFF"
-    task.spawn(function()
-        while speedOn do
-            if LP.Character and LP.Character:FindFirstChild("Humanoid") then
-                LP.Character.Humanoid.WalkSpeed = 100
-            end
-            task.wait(0.1)
-        end
-        if LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid.WalkSpeed = 16 end
-    end)
-end)
-
-local jumpOn = false
-JumpBtn.MouseButton1Click:Connect(function()
-    jumpOn = not jumpOn
-    JumpBtn.Text = jumpOn and "INF JUMP: ON" or "INF JUMP: OFF"
-end)
-UIS.JumpRequest:Connect(function() if jumpOn then LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end end)
-
-local espOn = false
-EspBtn.MouseButton1Click:Connect(function()
-    espOn = not espOn
-    EspBtn.Text = espOn and "ESP: ON" or "ESP: OFF"
-end)
-
-RunService.Heartbeat:Connect(function()
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local char = p.Character
-            local h = char:FindFirstChild("Highlight")
-            if espOn then
-                if not h then h = Instance.new("Highlight", char) end
-                h.FillColor = Color3.new(1, 0, 0)
-            else
-                if h then h:Destroy() end
-            end
-        end
-    end
-end)
+-- [CÁC NÚT PHỤ]
+local SpeedBtn = CreateBtn("SPEED HACK", UDim2.new(0, 10, 0, 65))
+local SellBtn = CreateBtn("AUTO SELL (10S)", UDim2.new(0, 10, 0, 120), Color3.fromRGB(0, 100, 200))
