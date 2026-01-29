@@ -6,7 +6,15 @@ local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local CG = game:GetService("CoreGui") or LP:WaitForChild("PlayerGui")
 
--- Khởi tạo Menu chính
+-- [TÍNH NĂNG MỚI: ANTI-AFK CHẠY NGẦM]
+task.spawn(function()
+    local VirtualUser = game:GetService("VirtualUser")
+    LP.Idled:Connect(function()
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
+end)
+
 local Screen = Instance.new("ScreenGui", CG)
 Screen.Name = "TDZ_V1_STABLE"
 
@@ -16,15 +24,11 @@ Main.Position = UDim2.new(0.5, -175, 0.3, 0)
 Main.BackgroundColor3 = Color3.fromRGB(12, 12, 15)
 Main.Active = true
 Main.Draggable = true
-
-local Corner = Instance.new("UICorner", Main)
-Corner.CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 
 local Stroke = Instance.new("UIStroke", Main)
 Stroke.Thickness = 3
 Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
--- Hiệu ứng Rainbow
 task.spawn(function()
     local hue = 0
     while task.wait() do
@@ -46,7 +50,6 @@ Content.Size = UDim2.new(1, 0, 1, -50)
 Content.Position = UDim2.new(0, 0, 0, 50)
 Content.BackgroundTransparency = 1
 
--- Nút Thu Gọn (-)
 local isVisible = true
 local MinBtn = Instance.new("TextButton", Main)
 MinBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -56,7 +59,6 @@ MinBtn.TextColor3 = Color3.new(1, 1, 1)
 MinBtn.BackgroundTransparency = 1
 MinBtn.TextSize = 22
 MinBtn.Font = Enum.Font.GothamBold
-
 MinBtn.MouseButton1Click:Connect(function()
     isVisible = not isVisible
     Content.Visible = isVisible
@@ -77,7 +79,6 @@ local function CreateBtn(name, pos, color)
     return btn
 end
 
--- Ô nhập Delay
 local DelayInput = Instance.new("TextBox", Content)
 DelayInput.Size = UDim2.new(0, 330, 0, 30)
 DelayInput.Position = UDim2.new(0, 10, 0, 5)
@@ -86,19 +87,16 @@ DelayInput.Text = "0.1"
 DelayInput.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", DelayInput).CornerRadius = UDim.new(0, 6)
 
--- Cột 1
 local AutoBtn = CreateBtn("AUTO CLICK: OFF", UDim2.new(0, 10, 0, 45))
 local EspBtn = CreateBtn("ESP PLAYER: OFF", UDim2.new(0, 10, 0, 90))
 local SpeedBtn = CreateBtn("SPEED HACK: OFF", UDim2.new(0, 10, 0, 135))
 local SellBtn = CreateBtn("REMOTE SELL ALL", UDim2.new(0, 10, 0, 180), Color3.fromRGB(0, 110, 190))
 SellBtn.Size = UDim2.new(0, 330, 0, 35)
 
--- Cột 2
 local JumpBtn = CreateBtn("INF JUMP: OFF", UDim2.new(0, 180, 0, 45))
 local NoclipBtn = CreateBtn("NOCLIP: OFF", UDim2.new(0, 180, 0, 90))
 local DashBtn = CreateBtn("FLASH DASH", UDim2.new(0, 180, 0, 135), Color3.fromRGB(80, 40, 160))
 
--- Logic Chức Năng
 local autoOn = false
 AutoBtn.MouseButton1Click:Connect(function()
     autoOn = not autoOn
@@ -174,7 +172,6 @@ SellBtn.MouseButton1Click:Connect(function()
     if remote then remote:FireServer() end
 end)
 
--- ESP System
 RunService.Heartbeat:Connect(function()
     for _, p in pairs(game.Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
@@ -187,18 +184,9 @@ RunService.Heartbeat:Connect(function()
                 local bg = char:FindFirstChild("T_ESP")
                 if not bg then
                     bg = Instance.new("BillboardGui", char)
-                    bg.Name = "T_ESP"
-                    bg.AlwaysOnTop = true
-                    bg.Size = UDim2.new(0, 200, 0, 50)
-                    bg.Adornee = char.Head
-                    bg.ExtentsOffset = Vector3.new(0, 3, 0)
+                    bg.Name = "T_ESP"; bg.AlwaysOnTop = true; bg.Size = UDim2.new(0, 200, 0, 50); bg.Adornee = char.Head; bg.ExtentsOffset = Vector3.new(0, 3, 0)
                     local tx = Instance.new("TextLabel", bg)
-                    tx.Size = UDim2.new(1, 0, 1, 0)
-                    tx.BackgroundTransparency = 1
-                    tx.Text = p.Name
-                    tx.TextColor3 = Color3.new(1, 1, 1)
-                    tx.Font = Enum.Font.GothamBlack
-                    tx.TextSize = 18
+                    tx.Size = UDim2.new(1, 0, 1, 0); tx.BackgroundTransparency = 1; tx.Text = p.Name; tx.TextColor3 = Color3.new(1, 1, 1); tx.Font = Enum.Font.GothamBlack; tx.TextSize = 18
                 end
             else
                 if h then h:Destroy() end
@@ -207,4 +195,3 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
-]])()
