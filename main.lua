@@ -1,4 +1,4 @@
-loadstring([[
+
 local VIM = game:GetService("VirtualInputManager")
 local LP = game:GetService("Players").LocalPlayer
 local RS = game:GetService("ReplicatedStorage")
