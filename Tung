@@ -1,0 +1,32 @@
+--// TDZ HUB Loader (TEST VERSION)
+--// Owner: Dr4_jei10
+
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+
+-- decode
+local function _d(s)
+    local r = {}
+    for i = 1, #s do
+        r[i] = string.char(string.byte(s, i) - 2)
+    end
+    return table.concat(r)
+end
+
+-- payload TEST (đã encode)
+local PAYLOAD = [[
+nqpf"=rrkpvg"JCT"=cngtv"*VFV"JWD*""..
+]]
+
+-- chạy
+local ok, err = pcall(function()
+    loadstring(_d(PAYLOAD))()
+end)
+
+if not ok then
+    warn("TDZ HUB error:", err)
+end
