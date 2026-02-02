@@ -1,32 +1,162 @@
---// TDZ HUB Loader (TEST VERSION)
---// Owner: Dr4_jei10
+--// LOAD WIND UI
+local WindUI = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"
+))()
 
-if not game:IsLoaded() then
-    game.Loaded:Wait()
-end
-
+--// SERVICES
 local Players = game:GetService("Players")
+local VIM = game:GetService("VirtualInputManager")
+local TeleportService = game:GetService("TeleportService")
+local RunService = game:GetService("RunService")
 local LP = Players.LocalPlayer
 
--- decode
-local function _d(s)
-    local r = {}
-    for i = 1, #s do
-        r[i] = string.char(string.byte(s, i) - 2)
-    end
-    return table.concat(r)
+--// SETTINGS
+getgenv().Setting = {
+    AutoBounty = false,
+    AutoHop = true,
+    Combo = true,
+    Hitbox = true,
+    ESP = true,
+    AutoHaki = true,
+    AutoKen = true,
+
+    FlyHeight = 45,
+    HitboxSize = 25,
+    SafeHealth = 4500,
+    HopDelay = 6,
+    OnlyHigherBounty = true
+}
+
+--// UI
+local Window = WindUI:CreateWindow({
+    Title = "Blox Fruits | FULL BOUNTY",
+    Author = "Custom",
+    Size = UDim2.fromOffset(540,450)
+})
+
+local Main = Window:CreateTab("Bounty")
+local Anti = Window:CreateTab("Anti")
+local Visual = Window:CreateTab("ESP")
+local Hop = Window:CreateTab("Server")
+
+Main:AddToggle("Auto Bounty", {Callback=function(v) Setting.AutoBounty=v end})
+Main:AddToggle("Combo Skill", {Default=true, Callback=function(v) Setting.Combo=v end})
+Main:AddToggle("Hitbox To", {Default=true, Callback=function(v) Setting.Hitbox=v end})
+Main:AddToggle("Chỉ Đánh Bounty Cao Hơn", {Default=true, Callback=function(v) Setting.OnlyHigherBounty=v end})
+
+Anti:AddToggle("Auto Haki", {Default=true, Callback=function(v) Setting.AutoHaki=v end})
+Anti:AddToggle("Auto Ken", {Default=true, Callback=function(v) Setting.AutoKen=v end})
+Anti:AddToggle("Anti Die", {Default=true, Callback=function(v) Setting.AntiDie=v end})
+
+Visual:AddToggle("ESP Player", {Default=true, Callback=function(v) Setting.ESP=v end})
+
+Hop:AddToggle("Auto Server Hop", {Default=true, Callback=function(v) Setting.AutoHop=v end})
+
+--// BASIC FUNCTIONS
+local function Key(k)
+    VIM:SendKeyEvent(true,k,false,game)
+    task.wait(0.07)
+    VIM:SendKeyEvent(false,k,false,game)
 end
 
--- payload TEST (đã encode)
-local PAYLOAD = [[
-nqpf"=rrkpvg"JCT"=cngtv"*VFV"JWD*""..
-]]
+local function Combo()
+    if not Setting.Combo then return end
+    Key("Z"); task.wait(0.25)
+    Key("X"); task.wait(0.25)
+    Key("C"); task.wait(0.25)
+    Key("V")
+end
 
--- chạy
-local ok, err = pcall(function()
-    loadstring(_d(PAYLOAD))()
+--// TARGET
+local function GetBounty(plr)
+    local ls = plr:FindFirstChild("leaderstats")
+    return ls and (ls:FindFirstChild("Bounty") or ls:FindFirstChild("Honor")) and ls.Bounty.Value or 0
+end
+
+local function GetTarget()
+    for _,plr in pairs(Players:GetPlayers()) do
+        if plr ~= LP and plr.Character
+        and plr.Character:FindFirstChild("HumanoidRootPart")
+        and plr.Character:FindFirstChild("Humanoid")
+        and plr.Character.Humanoid.Health > 0 then
+
+            if Setting.OnlyHigherBounty then
+                if GetBounty(plr) <= GetBounty(LP) then continue end
+            end
+            return plr
+        end
+    end
+end
+
+--// MOVE + HITBOX
+local function Move(target)
+    local hrp = LP.Character.HumanoidRootPart
+    local trp = target.Character.HumanoidRootPart
+    hrp.CFrame = trp.CFrame * CFrame.new(0,Setting.FlyHeight,6)
+end
+
+RunService.Heartbeat:Connect(function()
+    if Setting.Hitbox then
+        for _,plr in pairs(Players:GetPlayers()) do
+            if plr ~= LP and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = plr.Character.HumanoidRootPart
+                hrp.Size = Vector3.new(Setting.HitboxSize,Setting.HitboxSize,Setting.HitboxSize)
+                hrp.Transparency = 0.8
+                hrp.CanCollide = false
+            end
+        end
+    end
 end)
 
-if not ok then
-    warn("TDZ HUB error:", err)
+--// ANTI
+local function AutoSkill()
+    if Setting.AutoHaki then Key("J") end
+    if Setting.AutoKen then Key("E") end
 end
+
+local function AntiDie()
+    if not Setting.AntiDie then return end
+    local hum = LP.Character and LP.Character:FindFirstChild("Humanoid")
+    if hum and hum.Health <= Setting.SafeHealth then
+        LP.Character.HumanoidRootPart.CFrame *= CFrame.new(0,100,0)
+        task.wait(1)
+    end
+end
+
+--// ESP
+RunService.RenderStepped:Connect(function()
+    if not Setting.ESP then return end
+    for _,plr in pairs(Players:GetPlayers()) do
+        if plr ~= LP and plr.Character and not plr.Character:FindFirstChild("ESP") then
+            local hl = Instance.new("Highlight", plr.Character)
+            hl.Name = "ESP"
+            hl.FillTransparency = 0.6
+        end
+    end
+end)
+
+--// SERVER HOP
+task.spawn(function()
+    while task.wait(Setting.HopDelay) do
+        if Setting.AutoHop then
+            if #Players:GetPlayers() <= 1 or not GetTarget() then
+                TeleportService:Teleport(game.PlaceId)
+            end
+        end
+    end
+end)
+
+--// MAIN LOOP
+task.spawn(function()
+    while task.wait(0.2) do
+        if Setting.AutoBounty then
+            AutoSkill()
+            local target = GetTarget()
+            if target then
+                Move(target)
+                Combo()
+                AntiDie()
+            end
+        end
+    end
+end)
