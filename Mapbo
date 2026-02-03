@@ -1,0 +1,89 @@
+repeat task.wait() until game:IsLoaded()
+
+-- SERVICES (để rõ cho UI, không obfu)
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local LocalPlayer = Players.LocalPlayer
+
+-- LOAD WIND UI (giữ nguyên để khỏi lỗi menu)
+local WindUI = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"
+))()
+
+-- WINDOW
+local Window = WindUI:CreateWindow({
+    Title = "Auto Out",
+    Theme = "Dark",
+    Size = UDim2.fromOffset(380, 260)
+})
+local Main = Window:Tab({ Title = "Main", Icon = "log-out" })
+
+--------------------------------------------------
+-- AUTO OUT LOGIC (OBFU NHẸ – RỐI TÊN BIẾN)
+--------------------------------------------------
+local _x=false   -- enabled
+local _y=1       -- min players
+local _z=0.5     -- delay
+local _a=false   -- loaded
+local _b=false   -- outed
+
+local function _c()
+    if (not _x) or _b or (not _a) then return end
+    if (#Players:GetPlayers() > _y) then
+        _b = true
+        task.delay(_z, function()
+            pcall(function()
+                TeleportService:Teleport(game.PlaceId, LocalPlayer)
+            end)
+        end)
+    end
+end
+
+Players.PlayerAdded:Connect(function(p)
+    if p ~= LocalPlayer then _c() end
+end)
+
+task.delay(3, function()
+    _a = true
+    _c()
+end)
+
+--------------------------------------------------
+-- MENU ĐIỀU KHIỂN
+--------------------------------------------------
+Main:Toggle({
+    Title = "Bật Auto Out",
+    Desc = "Có người vào server là out",
+    Default = false,
+    Callback = function(v) _x = v end
+})
+
+Main:Slider({
+    Title = "Số người tối đa",
+    Desc = "Vượt số này thì out",
+    Min = 0, Max = 5, Default = 1,
+    Callback = function(v) _y = v end
+})
+
+Main:Slider({
+    Title = "Delay trước khi out (giây)",
+    Min = 0, Max = 5, Default = 0.5,
+    Callback = function(v) _z = v end
+})
+
+Main:Button({
+    Title = "Test Auto Out (Out ngay)",
+    Desc = "Bấm là out liền",
+    Callback = function()
+        pcall(function()
+            TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        end)
+    end
+})
+
+--------------------------------------------------
+-- LOAD ZENITH HUB (GIỮ NGUYÊN)
+--------------------------------------------------
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/toilatu890/Zenith-Hub/refs/heads/main/obfuscated_script-1769824988936.lua.txt"
+))()
